@@ -1,5 +1,6 @@
-{
+﻿{
   "levelName": "Electric Avenue",
+  "meta": { "title": "Electric Avenue", "parTime": 55, "collectibleTarget": 3 },
   "spawnPoint": { "x": 80, "y": 400 },
   "platforms": [
     { "x": 0, "y": 480, "w": 400, "h": 40, "color": "#1a1a24" },
@@ -15,5 +16,20 @@
   ],
   "goals": [
     { "x": 1320, "y": 400, "w": 40, "h": 80 }
+  ],
+  "checkpoints": [
+    { "x": 560, "y": 430, "w": 24, "h": 48 }
+  ],
+  "collectibles": [
+    { "x": 240, "y": 280, "w": 18, "h": 18 },
+    { "x": 740, "y": 280, "w": 18, "h": 18 },
+    { "x": 1235, "y": 280, "w": 18, "h": 18 }
+  ],
+  "enemies": [
+    { "id": "l2pat-1", "type": "patroller", "x": 1040, "y": 444, "w": 34, "h": 34, "range": 200 },
+    { "id": "l2shot-1", "type": "shooter", "x": 760, "y": 284, "w": 34, "h": 34 }
+  ],
+  "triggers": [
+    { "x": 980, "y": 430, "w": 80, "h": 60, "type": "message", "text": "Dash through pressure zones." }
   ]
 }

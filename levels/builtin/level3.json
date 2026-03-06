@@ -1,5 +1,6 @@
-{
+﻿{
   "levelName": "Static Void",
+  "meta": { "title": "Static Void", "parTime": 65, "collectibleTarget": 3 },
   "spawnPoint": { "x": 80, "y": 800 },
   "platforms": [
     { "x": 0, "y": 880, "w": 200, "h": 40, "color": "#1a1a24" },
@@ -16,5 +17,20 @@
   ],
   "goals": [
     { "x": 1620, "y": 200, "w": 40, "h": 80 }
+  ],
+  "checkpoints": [
+    { "x": 930, "y": 470, "w": 24, "h": 48 }
+  ],
+  "collectibles": [
+    { "x": 340, "y": 720, "w": 18, "h": 18 },
+    { "x": 1240, "y": 360, "w": 18, "h": 18 },
+    { "x": 1540, "y": 240, "w": 18, "h": 18 }
+  ],
+  "enemies": [
+    { "id": "l3jmp-1", "type": "jumper", "x": 640, "y": 604, "w": 34, "h": 34, "range": 120 },
+    { "id": "l3shot-1", "type": "shooter", "x": 1260, "y": 364, "w": 34, "h": 34 }
+  ],
+  "triggers": [
+    { "x": 1110, "y": 470, "w": 70, "h": 60, "type": "message", "text": "Stomp or dash enemies for safe openings." }
   ]
 }

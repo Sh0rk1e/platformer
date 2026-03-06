@@ -1,5 +1,6 @@
-{
+﻿{
   "levelName": "Quantum Leap",
+  "meta": { "title": "Quantum Leap", "parTime": 70, "collectibleTarget": 3 },
   "spawnPoint": { "x": 80, "y": 400 },
   "platforms": [
     { "x": 0, "y": 480, "w": 200, "h": 40, "color": "#1a1a24" },
@@ -15,5 +16,21 @@
   ],
   "goals": [
     { "x": 1720, "y": 400, "w": 40, "h": 80 }
+  ],
+  "checkpoints": [
+    { "x": 1210, "y": 270, "w": 24, "h": 48 }
+  ],
+  "collectibles": [
+    { "x": 430, "y": 280, "w": 18, "h": 18 },
+    { "x": 1230, "y": 280, "w": 18, "h": 18 },
+    { "x": 1670, "y": 440, "w": 18, "h": 18 }
+  ],
+  "enemies": [
+    { "id": "l4pat-1", "type": "patroller", "x": 220, "y": 604, "w": 34, "h": 34, "range": 400 },
+    { "id": "l4shot-1", "type": "shooter", "x": 1640, "y": 444, "w": 34, "h": 34 },
+    { "id": "l4jmp-1", "type": "jumper", "x": 830, "y": 444, "w": 34, "h": 34, "range": 120 }
+  ],
+  "triggers": [
+    { "x": 780, "y": 430, "w": 60, "h": 60, "type": "message", "text": "Final corridor. Keep momentum." }
   ]
 }

@@ -1,558 +1,141 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Pulse Platformer</title>
-    <style>
-        :root {
-            --neon-blue: #00f2ff;
-            --neon-pink: #ff0077;
-            --neon-green: #00ff88;
-            --bg-dark: #050508;
-        }
-        body { margin: 0; overflow: hidden; background: var(--bg-dark); font-family: 'Segoe UI', system-ui, sans-serif; color: white; }
-        canvas { display: block; filter: contrast(1.1) brightness(1.1); }
-        
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; padding: 30px; box-sizing: border-box; }
-        .hud-text { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,242,255,0.5); }
-        
-        #menu { 
-            position: absolute; top: 30px; right: 30px; 
-            background: rgba(10, 10, 15, 0.9); 
-            padding: 20px; border-radius: 12px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            backdrop-filter: blur(10px);
-            pointer-events: auto;
-            width: 240px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .menu-title { font-size: 14px; color: #888; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        .lvl-btn { 
-            display: block; width: 100%; margin: 8px 0; padding: 12px; 
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); 
-            color: #ccc; cursor: pointer; text-align: left; border-radius: 6px;
-            transition: all 0.2s ease; font-weight: 500;
-        }
-        .lvl-btn:hover { background: var(--neon-blue); color: #000; transform: translateX(5px); border-color: var(--neon-blue); }
-        
-        #vignette { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.4) 100%); }
-        #crt { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            pointer-events: none; 
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%); 
-            background-size: 100% 4px; 
-            z-index: 10;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neon Pulse Platformer</title>
+  <style>
+    :root {
+      --neon-blue: #00f2ff;
+      --neon-pink: #ff0077;
+      --neon-green: #00ff88;
+      --bg-dark: #050508;
+      --panel: rgba(10, 10, 16, 0.9);
+    }
+    body { margin: 0; overflow: hidden; background: var(--bg-dark); font-family: 'Segoe UI', system-ui, sans-serif; color: #fff; }
+    canvas { display: block; }
+    .hidden { display: none !important; }
+
+    #ui-layer { position: fixed; inset: 0; pointer-events: none; padding: 20px; box-sizing: border-box; }
+    #hud-main { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+    #hud-sub { margin-top: 8px; font-size: 14px; color: #a0a0ba; }
+    #hud-sub span { margin-right: 12px; }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      pointer-events: auto;
+    }
+
+    #menu { position: fixed; top: 20px; right: 20px; width: 290px; max-height: calc(100vh - 40px); overflow: auto; }
+    .menu-title { margin: 0 0 10px 0; font-size: 13px; letter-spacing: 1px; color: #a3a3b7; text-transform: uppercase; }
+    .lvl-btn {
+      display: block;
+      width: 100%;
+      margin: 7px 0;
+      padding: 11px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.13);
+      color: #d5d5e3;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: left;
+    }
+    .lvl-btn:hover:enabled { background: var(--neon-blue); color: #050508; border-color: var(--neon-blue); }
+    .lvl-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    #settings { margin-top: 12px; }
+    .row { display: flex; justify-content: space-between; align-items: center; margin: 6px 0; font-size: 13px; }
+    input[type='range'] { width: 130px; }
+
+    #buttons { margin-top: 10px; display: flex; gap: 8px; }
+    .action-btn {
+      flex: 1;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      border-radius: 6px;
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.5);
+      pointer-events: none;
+      z-index: 15;
+    }
+    #overlay-card {
+      min-width: 320px;
+      max-width: 540px;
+      text-align: center;
+      font-size: 18px;
+      line-height: 1.4;
+    }
+
+    #vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.45) 100%); }
+    #crt { position: fixed; inset: 0; pointer-events: none; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.12) 50%); background-size: 100% 4px; }
+
+    @media (max-width: 840px) {
+      #menu { width: 240px; top: 12px; right: 12px; }
+      #ui-layer { padding: 12px; }
+      #hud-main { font-size: 18px; }
+      #hud-sub { font-size: 12px; }
+      .row { font-size: 12px; }
+    }
+  </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <div id="vignette"></div>
-    <div id="crt"></div>
-    <div id="ui-layer">
-        <div id="current-lvl-name" class="hud-text">Initializing...</div>
-        <div style="margin-top: 10px; font-size: 16px; color: #888;">
-            Deaths: <span id="death-count" style="color: var(--neon-pink);">0</span> | 
-            Time: <span id="timer" style="color: var(--neon-green);">00:00</span>
-        </div>
+  <canvas id="gameCanvas"></canvas>
+  <div id="vignette"></div>
+  <div id="crt"></div>
+
+  <div id="ui-layer">
+    <div id="hud-main">Level: <span id="current-lvl-name">Menu</span></div>
+    <div id="hud-sub">
+      <span>Time <b id="timer">00:00</b></span>
+      <span>Deaths <b id="death-count">0</b></span>
+      <span>HP <b id="health-count">5/5</b></span>
+      <span>Shards <b id="shard-count">0/0</b></span>
+      <span>Dash <b id="dash-count">0/100</b></span>
     </div>
-    <div id="menu">
-        <div class="menu-title">Select Level</div>
-        <div id="lvl-list"></div>
+    <div style="margin-top:8px;font-size:12px;color:#7f7f95;">Move: WASD/Arrows | Jump: Space | Dash: Shift/K | Pause: Esc | Restart: R</div>
+  </div>
+
+  <aside id="menu" class="panel">
+    <p class="menu-title">Campaign</p>
+    <div id="lvl-list"></div>
+
+    <div id="buttons">
+      <button id="pause-btn" class="action-btn">Pause</button>
+      <button id="resume-btn" class="action-btn">Resume</button>
+      <button id="restart-btn" class="action-btn">Restart</button>
     </div>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
+    <div id="settings">
+      <p class="menu-title">Settings</p>
+      <div class="row"><label>Music</label><input id="music-vol" type="range" min="0" max="1" step="0.05"></div>
+      <div class="row"><label>SFX</label><input id="sfx-vol" type="range" min="0" max="1" step="0.05"></div>
+      <div class="row"><label>Mute</label><input id="mute-toggle" type="checkbox"></div>
+      <div class="row"><label>Reduced Shake</label><input id="reduce-shake" type="checkbox"></div>
+      <div class="row"><label>High-Contrast Hazards</label><input id="high-contrast" type="checkbox"></div>
+    </div>
+  </aside>
 
-        const resize = () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        };
-        window.onresize = resize;
-        resize();
+  <div id="overlay" class="hidden">
+    <div id="overlay-card" class="panel">
+      <div id="overlay-text"></div>
+    </div>
+  </div>
 
-        const keys = {};
-        window.onkeydown = e => keys[e.code] = true;
-        window.onkeyup = e => keys[e.code] = false;
-
-        class Particle {
-            constructor(x, y, color) {
-                this.x = x; this.y = y;
-                this.vx = (Math.random() - 0.5) * 10;
-                this.vy = (Math.random() - 0.5) * 10;
-                this.life = 1.0;
-                this.color = color;
-                this.size = Math.random() * 4 + 2;
-            }
-            update() {
-                this.x += this.vx; this.y += this.vy;
-                this.life -= 0.02;
-                this.size *= 0.95;
-            }
-            draw(camX, camY) {
-                ctx.fillStyle = this.color;
-                ctx.globalAlpha = this.life;
-                ctx.fillRect(this.x - camX, this.y - camY, this.size, this.size);
-                ctx.globalAlpha = 1;
-            }
-        }
-
-        class Trail {
-            constructor(x, y, w, h, color) {
-                this.x = x; this.y = y;
-                this.w = w; this.h = h;
-                this.color = color;
-                this.life = 1.0;
-            }
-            update() { this.life -= 0.05; }
-            draw(camX, camY) {
-                ctx.globalAlpha = this.life * 0.4;
-                ctx.fillStyle = this.color;
-                ctx.fillRect(this.x - camX, this.y - camY, this.w, this.h);
-                ctx.globalAlpha = 1;
-            }
-        }
-
-        class Player {
-            constructor(x, y) {
-                this.pos = { x, y };
-                this.vel = { x: 0, y: 0 };
-                this.w = 32; this.h = 48;
-                this.accel = 0.8;
-                this.maxVel = 8;
-                this.friction = 0.88;
-                this.gravity = 0.55;
-                this.jumpForce = -13.5;
-                this.grounded = false;
-                
-                // Advanced Physics
-                this.coyoteTime = 0;
-                this.jumpBuffer = 0;
-                this.lastGrounded = 0;
-                
-                // Animation
-                this.scaleX = 1;
-                this.scaleY = 1;
-                this.particles = [];
-                this.trails = [];
-                
-                // New states
-                this.canDoubleJump = true;
-                this.isDashing = false;
-                this.dashCooldown = 0;
-                this.dashTimer = 0;
-                this.wallSliding = false;
-                this.facing = 1;
-            }
-
-            update(levelData) {
-                // Buffer & Coyote
-                if (this.grounded) {
-                    this.coyoteTime = 10;
-                    this.canDoubleJump = true;
-                } else {
-                    this.coyoteTime--;
-                }
-                
-                if (keys['Space']) this.jumpBuffer = 10; else this.jumpBuffer--;
-
-                // Dash logic
-                if (this.dashCooldown > 0) this.dashCooldown--;
-                if ((keys['ShiftLeft'] || keys['ShiftRight'] || keys['KeyK']) && this.dashCooldown <= 0) {
-                    this.isDashing = true;
-                    this.dashTimer = 12;
-                    this.dashCooldown = 35;
-                    this.vel.y = 0;
-                    this.emitParticles('#fff', 15);
-                    game.shake = 8;
-                }
-
-                if (this.isDashing) {
-                    this.vel.x = this.facing * 16;
-                    this.vel.y = 0;
-                    this.dashTimer--;
-                    if (this.dashTimer <= 0) {
-                        this.isDashing = false;
-                        this.vel.x *= 0.5;
-                    }
-                } else {
-                    // Horizontal Movement
-                    if (keys['ArrowRight'] || keys['KeyD']) {
-                        this.vel.x = Math.min(this.vel.x + this.accel, this.maxVel);
-                        this.facing = 1;
-                    }
-                    else if (keys['ArrowLeft'] || keys['KeyA']) {
-                        this.vel.x = Math.max(this.vel.x - this.accel, -this.maxVel);
-                        this.facing = -1;
-                    }
-                    else this.vel.x *= this.friction;
-
-                    // Wall sliding
-                    this.checkWallSlide(levelData.platforms);
-                    
-                    if (this.wallSliding) {
-                        this.vel.y = Math.min(this.vel.y + this.gravity * 0.5, 2.5);
-                    } else {
-                        this.vel.y += this.gravity;
-                    }
-                }
-                
-                // Physics steps
-                this.pos.x += this.vel.x;
-                this.solveCollisions(levelData.platforms, 'x');
-                this.pos.y += this.vel.y;
-                this.solveCollisions(levelData.platforms, 'y');
-
-                // Jump logic
-                if (this.jumpBuffer > 0) {
-                    if (this.coyoteTime > 0) {
-                        this.vel.y = this.jumpForce;
-                        this.grounded = false;
-                        this.coyoteTime = 0;
-                        this.jumpBuffer = 0;
-                        this.scaleX = 0.7; this.scaleY = 1.3;
-                        this.emitParticles('#fff', 8);
-                    } else if (this.wallSliding) {
-                        this.vel.y = this.jumpForce;
-                        this.vel.x = -this.facing * 12;
-                        this.facing = -this.facing;
-                        this.wallSliding = false;
-                        this.jumpBuffer = 0;
-                        this.scaleX = 0.7; this.scaleY = 1.3;
-                        this.emitParticles('#fff', 8);
-                    } else if (this.canDoubleJump) {
-                        this.vel.y = this.jumpForce * 0.85;
-                        this.canDoubleJump = false;
-                        this.jumpBuffer = 0;
-                        this.scaleX = 0.8; this.scaleY = 1.2;
-                        this.emitParticles('#00f2ff', 10);
-                    }
-                }
-                
-                // Variable Jump Height
-                if (!keys['Space'] && this.vel.y < -3) {
-                    this.vel.y *= 0.5;
-                }
-
-                // Hazards & Goals
-                this.checkType(levelData.hazards, () => this.die(levelData));
-                this.checkType(levelData.goals, () => game.nextLevel());
-
-                // Juice
-                if (this.isDashing || Math.abs(this.vel.x) > 12) {
-                    this.trails.push(new Trail(this.pos.x, this.pos.y, this.w, this.h, this.isDashing ? '#fff' : '#00f2ff'));
-                }
-                this.trails.forEach((t, i) => {
-                    t.update();
-                    if (t.life <= 0) this.trails.splice(i, 1);
-                });
-
-                // Animation lerp
-                this.scaleX += (1 - this.scaleX) * 0.2;
-                this.scaleY += (1 - this.scaleY) * 0.2;
-                
-                this.particles.forEach((p, i) => {
-                    p.update();
-                    if (p.life <= 0) this.particles.splice(i, 1);
-                });
-            }
-
-            checkWallSlide(platforms) {
-                this.wallSliding = false;
-                if (this.grounded) return;
-
-                const checkDist = 2;
-                const sideRect = {
-                    x: this.facing > 0 ? this.pos.x + this.w : this.pos.x - checkDist,
-                    y: this.pos.y + 5,
-                    w: checkDist,
-                    h: this.h - 10
-                };
-
-                platforms.forEach(r => {
-                    if (sideRect.x < r.x + r.w && sideRect.x + sideRect.w > r.x &&
-                        sideRect.y < r.y + r.h && sideRect.y + sideRect.h > r.y) {
-                        if (this.vel.y > 0) this.wallSliding = true;
-                    }
-                });
-            }
-
-            solveCollisions(rects, axis) {
-                if (axis === 'y') this.grounded = false;
-                rects.forEach(r => {
-                    if (this.isColliding(r)) {
-                        if (axis === 'x') {
-                            const overlapX = (this.pos.x + this.w / 2 < r.x + r.w / 2) ? r.x - (this.pos.x + this.w) : (r.x + r.w) - this.pos.x;
-                            this.pos.x += overlapX;
-                            this.vel.x = 0;
-                        } else {
-                            const overlapY = (this.pos.y + this.h / 2 < r.y + r.h / 2) ? r.y - (this.pos.y + this.h) : (r.y + r.h) - this.pos.y;
-                            if (this.vel.y > 0 && !this.grounded) {
-                                this.grounded = true;
-                                this.scaleX = 1.3; this.scaleY = 0.7; // Squash
-                                this.emitParticles('#00f2ff', 5);
-                            }
-                            this.pos.y += overlapY;
-                            this.vel.y = 0;
-                        }
-                    }
-                });
-            }
-
-            isColliding(r) {
-                return this.pos.x < r.x + r.w && this.pos.x + this.w > r.x && this.pos.y < r.y + r.h && this.pos.y + this.h > r.y;
-            }
-
-            checkType(list, action) {
-                if (!list) return;
-                list.forEach(item => { if (this.isColliding(item)) action(); });
-            }
-
-            die(levelData) {
-                this.emitParticles('#ff0077', 20);
-                game.shake = 15;
-                game.deaths++;
-                this.pos = { ...levelData.spawnPoint };
-                this.vel = { x: 0, y: 0 };
-                this.isDashing = false;
-                this.canDoubleJump = true;
-            }
-
-            emitParticles(color, count) {
-                for(let i=0; i<count; i++) this.particles.push(new Particle(this.pos.x + this.w/2, this.pos.y + this.h/2, color));
-            }
-
-            draw(camX, camY) {
-                this.trails.forEach(t => t.draw(camX, camY));
-                this.particles.forEach(p => p.draw(camX, camY));
-                
-                ctx.save();
-                ctx.translate(this.pos.x - camX + this.w/2, this.pos.y - camY + this.h/2);
-                ctx.scale(this.scaleX, this.scaleY);
-                if (this.wallSliding) ctx.rotate(this.facing * 0.1);
-                
-                // Player Glow
-                ctx.shadowBlur = this.isDashing ? 40 : 20;
-                ctx.shadowColor = this.isDashing ? '#fff' : '#00f2ff';
-                ctx.fillStyle = this.isDashing ? '#fff' : '#00f2ff';
-                ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
-                
-                // Eyes
-                ctx.fillStyle = '#050508';
-                const eyeX = this.facing * 6;
-                const eyeY = this.vel.y > 1 ? 2 : (this.vel.y < -1 ? -2 : 0);
-                ctx.fillRect(eyeX - 4, eyeY - 12, 8, 8);
-                
-                ctx.restore();
-            }
-        }
-
-        class Game {
-            constructor() {
-                this.level = null;
-                this.player = null;
-                this.camX = 0;
-                this.camY = 0;
-                this.shake = 0;
-                this.manifest = null;
-                this.currentIdx = 0;
-                this.deaths = 0;
-                this.startTime = Date.now();
-            }
-
-            async start() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const isTest = urlParams.get('test') === 'true';
-
-                if (isTest) {
-                    const testData = sessionStorage.getItem('neon-test-level');
-                    if (testData) {
-                        this.level = JSON.parse(testData);
-                        this.player = new Player(this.level.spawnPoint.x, this.level.spawnPoint.y);
-                        document.getElementById('current-lvl-name').innerText = "TESTING: " + this.level.levelName;
-                        // Hide menu in test mode
-                        document.getElementById('menu').style.display = 'none';
-                        // Add exit test button
-                        const exitBtn = document.createElement('button');
-                        exitBtn.innerText = "EXIT TEST";
-                        exitBtn.style = "position:absolute; bottom:30px; right:30px; padding:15px 25px; background:var(--neon-pink); border:none; color:white; font-weight:bold; cursor:pointer; pointer-events:auto; border-radius:8px;";
-                        exitBtn.onclick = () => window.location.href = 'levelcreator.html';
-                        document.body.appendChild(exitBtn);
-                        
-                        this.loop();
-                        return;
-                    }
-                }
-
-                const res = await fetch('./levels/builtin/manifest.json');
-                this.manifest = await res.json();
-                this.buildMenu();
-                await this.loadLevel(`./levels/builtin/${this.manifest.builtin[0]}`);
-                this.loop();
-            }
-
-            updateHUD() {
-                const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-                const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
-                const secs = String(elapsed % 60).padStart(2, '0');
-                document.getElementById('timer').innerText = `${mins}:${secs}`;
-                document.getElementById('death-count').innerText = this.deaths;
-            }
-
-            buildMenu() {
-                const list = document.getElementById('lvl-list');
-                list.innerHTML = '';
-                this.manifest.builtin.forEach((f, i) => {
-                    const btn = document.createElement('button');
-                    btn.className = 'lvl-btn';
-                    btn.innerText = `LEVEL ${i+1}: ${f.replace('.json', '')}`;
-                    btn.onclick = () => { this.currentIdx = i; this.loadLevel(`./levels/builtin/${f}`); };
-                    list.appendChild(btn);
-                });
-            }
-
-            async loadLevel(url) {
-                const res = await fetch(url);
-                this.level = await res.json();
-                this.player = new Player(this.level.spawnPoint.x, this.level.spawnPoint.y);
-                document.getElementById('current-lvl-name').innerText = this.level.levelName;
-                this.camX = this.player.pos.x - width / 2;
-                this.camY = this.player.pos.y - height / 2;
-            }
-
-            nextLevel() {
-                this.currentIdx = (this.currentIdx + 1) % this.manifest.builtin.length;
-                this.loadLevel(`./levels/builtin/${this.manifest.builtin[this.currentIdx]}`);
-            }
-
-            drawBackground() {
-                // Deep Parallax Stars/Dots
-                const layers = [
-                    { color: '#0a0a1a', speed: 0.05, size: 500 },
-                    { color: '#0f0f25', speed: 0.15, size: 300 },
-                    { color: '#151535', speed: 0.3, size: 150 }
-                ];
-                layers.forEach(l => {
-                    ctx.fillStyle = l.color;
-                    const offsetX = -(this.camX * l.speed) % l.size;
-                    const offsetY = -(this.camY * l.speed) % l.size;
-                    for (let x = offsetX - l.size; x < width + l.size; x += l.size) {
-                        for (let y = offsetY - l.size; y < height + l.size; y += l.size) {
-                            ctx.beginPath();
-                            ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-                            ctx.fill();
-                        }
-                    }
-                });
-                
-                // Grid
-                ctx.strokeStyle = 'rgba(0, 242, 255, 0.05)';
-                ctx.lineWidth = 1;
-                const gridSize = 120;
-                const gridOffX = -this.camX % gridSize;
-                const gridOffY = -this.camY % gridSize;
-                
-                ctx.beginPath();
-                for(let x = gridOffX; x < width; x += gridSize) {
-                    ctx.moveTo(x, 0); ctx.lineTo(x, height);
-                }
-                for(let y = gridOffY; y < height; y += gridSize) {
-                    ctx.moveTo(0, y); ctx.lineTo(width, y);
-                }
-                ctx.stroke();
-            }
-
-            loop() {
-                if (!this.level) return;
-                
-                // Clear & BG
-                ctx.fillStyle = '#050508';
-                ctx.fillRect(0, 0, width, height);
-                this.drawBackground();
-
-                // Speed Lines
-                if (Math.abs(this.player.vel.x) > 10 || this.player.isDashing) {
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-                    ctx.lineWidth = 1;
-                    for(let i=0; i<10; i++) {
-                        let x = Math.random() * width;
-                        let y = Math.random() * height;
-                        let len = Math.random() * 100 + 50;
-                        ctx.beginPath();
-                        ctx.moveTo(x, y);
-                        ctx.lineTo(x + (this.player.vel.x > 0 ? -len : len), y);
-                        ctx.stroke();
-                    }
-                }
-
-                // Camera - Look ahead and follow Y
-                let targetCamX = this.player.pos.x - width / 2 + (this.player.vel.x * 20);
-                let targetCamY = this.player.pos.y - height / 2 + (this.player.vel.y * 10);
-                
-                this.camX += (targetCamX - this.camX) * 0.08;
-                this.camY += (targetCamY - this.camY) * 0.08;
-                
-                // Screen Shake
-                ctx.save();
-                if (this.shake > 0) {
-                    ctx.translate((Math.random()-0.5)*this.shake, (Math.random()-0.5)*this.shake);
-                    this.shake *= 0.9;
-                }
-
-                // Draw Platforms
-                this.level.platforms.forEach(p => {
-                    const color = p.color || '#333';
-                    ctx.shadowBlur = color === '#333' ? 0 : 15;
-                    ctx.shadowColor = color;
-                    ctx.fillStyle = color;
-                    ctx.fillRect(p.x - this.camX, p.y - this.camY, p.w, p.h);
-                    
-                    // Bevel/Edge light
-                    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-                    ctx.strokeRect(p.x - this.camX, p.y - this.camY, p.w, p.h);
-                });
-
-                // Hazards
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = '#ff0077';
-                ctx.fillStyle = '#ff0077';
-                if(this.level.hazards) this.level.hazards.forEach(h => {
-                    // Draw spike-like triangles
-                    const steps = Math.ceil(h.w / 20);
-                    const stepW = h.w / steps;
-                    for(let i=0; i<steps; i++) {
-                        ctx.beginPath();
-                        ctx.moveTo(h.x + i*stepW - this.camX, h.y + h.h - this.camY);
-                        ctx.lineTo(h.x + (i+0.5)*stepW - this.camX, h.y - this.camY);
-                        ctx.lineTo(h.x + (i+1)*stepW - this.camX, h.y + h.h - this.camY);
-                        ctx.fill();
-                    }
-                });
-
-                // Goals
-                ctx.shadowColor = '#00ff88';
-                ctx.fillStyle = '#00ff88';
-                if(this.level.goals) this.level.goals.forEach(g => {
-                    const pulse = Math.sin(Date.now()/200) * 10;
-                    ctx.shadowBlur = 20 + pulse;
-                    ctx.fillRect(g.x - this.camX, g.y - this.camY, g.w, g.h);
-                });
-
-                ctx.shadowBlur = 0;
-                this.player.update(this.level);
-                this.player.draw(this.camX, this.camY);
-                this.updateHUD();
-                
-                ctx.restore();
-                requestAnimationFrame(() => this.loop());
-            }
-        }
-
-        const game = new Game();
-        game.start();
-    </script>
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>
